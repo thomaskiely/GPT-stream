@@ -1,3 +1,3 @@
 # GPT-stream
 
-Test commit
+A bot that can talk to twitch chat that leverages Chat GPT
