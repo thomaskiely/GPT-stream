@@ -1,28 +1,43 @@
-from pathlib import Path
-from openai import OpenAI
+import os
 from dotenv import load_dotenv
-import readChat
+import irc.bot
+load_dotenv()
 
-def main():
+
+class TwitchChatBot(irc.bot.SingleServerIRCBot):
+  def __init__(self, username, token, channel):
+    self.token = token
+    self.channel = channel
+    server = 'irc.chat.twitch.tv'
+    port = 6667
+    irc.bot.SingleServerIRCBot.__init__(self, [(server, port, 'oauth:' + token)], username, username)
     
-
-  load_dotenv()
-
-  client = OpenAI()
-
-  #speech_file_path = Path(__file__).parent / "speech.mp3"
-  """ response = client.audio.speech.create(
-    model="tts-1",
-    voice="onyx",
-    input="Today is a wonderful day to build something people love!"
-  )
-
-  response.with_streaming_response.method("output.mp3") """
+  
+  print("a")
+ 
+  def on_welcome(self, connection, event):
+       
+        connection.join(self.channel)
+        print("joined channel" + self.channel)
 
 
-  print("hello")
-  readChat.readTwitchChat() 
+
+  def on_pubmsg(self, connection, event):
+        try:
+            if event.target == self.channel:
+                username = event.source.split('!')[0]
+                message = event.arguments[0]
+                print(f'{username}: {message}')
+        except Exception as e:
+            print("Error in on_pubmsg:", e)
+
+
 
 
 if __name__ == "__main__":
-  main()
+  TWITCH_TOKEN = os.getenv('TWITCH_TOKEN')
+  TWITCH_CLIENT_ID= os.getenv('TWITCH_CLIENT_ID')
+  TWITCH_USERNAME= os.getenv('TWITCH_USERNAME')
+  CHANNEL = '#' + TWITCH_USERNAME
+  bot = TwitchChatBot(TWITCH_USERNAME, TWITCH_TOKEN, CHANNEL)
+  bot.start()
