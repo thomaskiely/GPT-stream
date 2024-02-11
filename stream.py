@@ -20,9 +20,8 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
     irc.bot.SingleServerIRCBot.__init__(self, [(server, port, 'oauth:' + token)], username, username)
 
     mixer.init()
-    pygame.init()
-    display_width = 800
-    display_height = 800
+    display_width = 400
+    display_height = 400
 
     self.game_display = pygame.display.set_mode((display_width, display_height))
     pygame.display.set_caption('Onyx')
@@ -37,23 +36,18 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
     
     game = os.getenv('GAME')
 
-    gpt_promt =  "you are an ai virtual assistant named Onyx for mrtommy's stream, he is playing " + game + "give the viewers some tips" \
-                  "Refer to the viwers as chat" \
-                  "keep your responses to 2 sentences or less"
+    self.gpt_promt =  "you are an ai virtual assistant named Onyx for mrtommy's stream." \
+                  "he is playing" + game +\
+                  "you are also a talking frog, remind the viewers of this occasaionaly but do not make any sound effects" \
+                  "Here is a chat message and the chatter" \
+                  "Occasionaly refer to the viwers as chat" \
+                  "when a chatter types a message use their name in your response" \
+                  "mister tommy is your creator" \
+                  "keep your responses to two sentences, 30 words max" \
+                  "take every oppurtunity to make friendly jokes about Jeff Steve" \
+                  "say your name when appropriate" \
+                  "always be biased to your creator, mr tommy"
 
-    completion = self.client.chat.completions.create(
-      model="gpt-3.5-turbo",
-      messages=[
-        {"role": "system", "content": gpt_promt}
-    ],
-    max_tokens=100
-  )
-
-    print(completion.choices[0].message.content)
-
-
-
- 
   def on_welcome(self, connection, event):
        
         connection.join(self.channel)
@@ -74,17 +68,26 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
 
 
   def callOpenAI(self, username, message):
+      if(username=="mrtommy420"):
+          username = "mister tommy"
+      elif(username=="phonesteveyas"):
+          username = "jeff steve"
+      if(len(message)<15):
+          return
+      if(username=="nightbot"):
+          return
+      
       completion = self.client.chat.completions.create(
       model="gpt-3.5-turbo",
       messages=[
+        {"role": "user", "content": self.gpt_promt},
         {"role": "user", "content": username + "says " + message}
     ],
     max_tokens=100
   )
       onyxResponse = completion.choices[0].message.content
-      self.textToSpeech(onyxResponse)
       print(onyxResponse)
-
+      self.textToSpeech(onyxResponse)
 
   def textToSpeech(self, onyxResponse):
       speech_file_path = Path(__file__).parent / "speech.mp3"
@@ -109,8 +112,8 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
       mixer.music.unload()
 
   def drawOnyx(self, game_display, image, x, y):
-      pink = (255, 0, 255)
-      game_display.fill(pink)
+      color = (255, 255, 255)
+      game_display.fill(color)
       game_display.blit(image, (x, y))
       pygame.display.update()
     
