@@ -4,6 +4,9 @@ import irc.bot
 import pygame
 from openai import OpenAI
 from pathlib import Path
+from pygame import mixer
+import random
+import time
 load_dotenv()
 
 
@@ -16,7 +19,19 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
     self.client = OpenAI()
     irc.bot.SingleServerIRCBot.__init__(self, [(server, port, 'oauth:' + token)], username, username)
 
-    print("call inital open ai")
+    mixer.init()
+    pygame.init()
+    display_width = 800
+    display_height = 800
+
+    self.game_display = pygame.display.set_mode((display_width, display_height))
+    pygame.display.set_caption('Onyx')
+
+    self.talking_img = pygame.image.load('onyxTalking.png')
+    self.waiting_img = pygame.image.load('onyxNotTalking.png')
+
+    self.drawOnyx(self.game_display, self.waiting_img, 0, 0)
+    pygame.event.pump()
     
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     
@@ -67,10 +82,8 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
     max_tokens=100
   )
       onyxResponse = completion.choices[0].message.content
-      # output text to speech here
       self.textToSpeech(onyxResponse)
       print(onyxResponse)
-      self.drawSam()
 
 
   def textToSpeech(self, onyxResponse):
@@ -81,17 +94,25 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
       input= onyxResponse
     )
       response.stream_to_file(speech_file_path)
+      self.moveOnyx(speech_file_path)
 
 
-  def drawSam(self):
-     #print("Draw Samantha")
-      #FIX THIS
-     """  screen = pygame.display.set_mode((800, 800))
-      talkingSam = pygame.image.load('samTalking.png')
-      notTalkingSam = pygame.image.load('samNotTalking.png')
-      screen.blit(talkingSam,(200,200))
+  
+  def moveOnyx(self, onyxSpeech):
+      mixer.music.load(onyxSpeech)
+      mixer.music.play()
+      while mixer.music.get_busy():
+          pygame.event.pump()
+          self.drawOnyx(self.game_display, self.talking_img, random.randint(0,10), random.randint(0,10))
+          time.sleep(.08)
+      self.drawOnyx(self.game_display, self.waiting_img,0,0)
+      mixer.music.unload()
+
+  def drawOnyx(self, game_display, image, x, y):
+      pink = (255, 0, 255)
+      game_display.fill(pink)
+      game_display.blit(image, (x, y))
       pygame.display.update()
-      pygame.event.pump() """
     
 
 
