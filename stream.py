@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import irc.bot
 import pygame
 from openai import OpenAI
+from pathlib import Path
 load_dotenv()
 
 
@@ -22,13 +23,13 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
     game = os.getenv('GAME')
 
     gpt_promt =  "you are an ai virtual assistant named Onyx for mrtommy's stream, he is playing " + game + "give the viewers some tips" \
-                  "Refer to the viwers as chat"
+                  "Refer to the viwers as chat" \
+                  "keep your responses to 2 sentences or less"
 
     completion = self.client.chat.completions.create(
       model="gpt-3.5-turbo",
       messages=[
-        {"role": "system", "content": gpt_promt},
-        {"role": "user", "content": "Who are you?"}
+        {"role": "system", "content": gpt_promt}
     ],
     max_tokens=100
   )
@@ -65,9 +66,22 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
     ],
     max_tokens=100
   )
+      onyxResponse = completion.choices[0].message.content
       # output text to speech here
-      print(completion.choices[0].message.content)
+      self.textToSpeech(onyxResponse)
+      print(onyxResponse)
       self.drawSam()
+
+
+  def textToSpeech(self, onyxResponse):
+      speech_file_path = Path(__file__).parent / "speech.mp3"
+      response = self.client.audio.speech.create(
+      model="tts-1",
+      voice="onyx",
+      input= onyxResponse
+    )
+      response.stream_to_file(speech_file_path)
+
 
   def drawSam(self):
      #print("Draw Samantha")
