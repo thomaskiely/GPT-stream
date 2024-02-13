@@ -7,8 +7,11 @@ from pathlib import Path
 from pygame import mixer
 import random
 import time
-load_dotenv()
+import threading
 
+lock = threading.Lock()
+isTalking = False
+load_dotenv()
 
 class TwitchChatBot(irc.bot.SingleServerIRCBot):
   def __init__(self, username, token, channel):
@@ -20,17 +23,17 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
     irc.bot.SingleServerIRCBot.__init__(self, [(server, port, 'oauth:' + token)], username, username)
 
     mixer.init()
+    """pygame.init()
     display_width = 400
     display_height = 400
 
     self.game_display = pygame.display.set_mode((display_width, display_height))
     pygame.display.set_caption('Onyx')
-
     self.talking_img = pygame.image.load('onyxTalking.png')
     self.waiting_img = pygame.image.load('onyxNotTalking.png')
-
     self.drawOnyx(self.game_display, self.waiting_img, 0, 0)
-    pygame.event.pump()
+    pygame.event.pump() """
+
     
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     
@@ -38,20 +41,29 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
 
     self.gpt_promt =  "you are an ai virtual assistant named Onyx for mrtommy's stream." \
                   "he is playing" + game +\
-                  "you are also a talking frog, remind the viewers of this occasaionaly but do not make any sound effects" \
+                  "you are also a talking frog, remind the viewers of this occasionally." \
                   "Here is a chat message and the chatter" \
-                  "Occasionaly refer to the viwers as chat" \
+                  "occasionally refer to the viewers as chat" \
                   "when a chatter types a message use their name in your response" \
-                  "mister tommy is your creator" \
+                  "Mr. Tommy is your creator, he has great coding skills" \
                   "keep your responses to two sentences, 30 words max" \
-                  "take every oppurtunity to make friendly jokes about Jeff Steve" \
+                  "take every oppurtunity to make jokes about Jeff Steve" \
                   "say your name when appropriate" \
-                  "always be biased to your creator, mr tommy"
+                  "always be biased to your creator, Mr. Tommy"
+    
+    
+    
+
+
+    
 
   def on_welcome(self, connection, event):
        
         connection.join(self.channel)
         print("joined channel" + self.channel)
+
+
+
 
 
 
@@ -65,11 +77,9 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
         except Exception as e:
             print("Error in on_pubmsg:", e)
 
-
-
   def callOpenAI(self, username, message):
       if(username=="mrtommy420"):
-          username = "mister tommy"
+          username = "Mr.Tommy"
       elif(username=="phonesteveyas"):
           username = "jeff steve"
       if(len(message)<15):
@@ -97,35 +107,76 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
       input= onyxResponse
     )
       response.stream_to_file(speech_file_path)
+      self.test = True
       self.moveOnyx(speech_file_path)
 
 
   
   def moveOnyx(self, onyxSpeech):
+      
+      global isTalking
       mixer.music.load(onyxSpeech)
       mixer.music.play()
       while mixer.music.get_busy():
-          pygame.event.pump()
-          self.drawOnyx(self.game_display, self.talking_img, random.randint(0,10), random.randint(0,10))
-          time.sleep(.08)
-      self.drawOnyx(self.game_display, self.waiting_img,0,0)
+        with lock:
+            isTalking = True
+        #pygame.event.pump()
+        #self.drawOnyx(self.game_display, self.talking_img, random.randint(0,10), random.randint(0,10))
+        #time.sleep(.08)
+      #self.drawOnyx(self.game_display, self.waiting_img,0,0)
       mixer.music.unload()
+      with lock:
+            isTalking = False
+      
+      
 
   def drawOnyx(self, game_display, image, x, y):
       color = (255, 255, 255)
       game_display.fill(color)
       game_display.blit(image, (x, y))
       pygame.display.update()
-    
 
 
+def run_pygame():
+    pygame.init()
+    game_display = pygame.display.set_mode((400, 400))
+    pygame.display.set_caption('Onyx')
+    clock = pygame.time.Clock()
 
+    talking_img = pygame.image.load('onyxTalking.png')
+    waiting_img = pygame.image.load('onyxNotTalking.png')
+
+
+    global isTalking
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        # Draw Onyx
+        game_display.fill((255, 255, 255))  # White background
+        # Draw Onyx at a random position
+        print(isTalking)
+        
+        if(isTalking):
+            game_display.blit(talking_img, (random.randint(0, 10), random.randint(0, 10)))
+            pygame.display.update()
+        else:
+            game_display.blit(waiting_img, (random.randint(0, 10), random.randint(0, 10)))
+            pygame.display.update()
+        
+        
+
+        clock.tick(30)  # Limit FPS
+      
 
 if __name__ == "__main__":
   TWITCH_TOKEN = os.getenv('TWITCH_TOKEN')
   TWITCH_CLIENT_ID= os.getenv('TWITCH_CLIENT_ID')
   TWITCH_USERNAME= os.getenv('TWITCH_USERNAME')
   CHANNEL = '#' + TWITCH_USERNAME
-  pygame.init()
   bot = TwitchChatBot(TWITCH_USERNAME, TWITCH_TOKEN, CHANNEL)
+  pygame_thread = threading.Thread(target=run_pygame)
+  pygame_thread.start()
   bot.start()
