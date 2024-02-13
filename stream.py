@@ -21,20 +21,9 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
     port = 6667
     self.client = OpenAI()
     irc.bot.SingleServerIRCBot.__init__(self, [(server, port, 'oauth:' + token)], username, username)
-
     mixer.init()
-    """pygame.init()
-    display_width = 400
-    display_height = 400
-
-    self.game_display = pygame.display.set_mode((display_width, display_height))
-    pygame.display.set_caption('Onyx')
-    self.talking_img = pygame.image.load('onyxTalking.png')
-    self.waiting_img = pygame.image.load('onyxNotTalking.png')
-    self.drawOnyx(self.game_display, self.waiting_img, 0, 0)
-    pygame.event.pump() """
-
-    
+   
+ 
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     
     game = os.getenv('GAME')
@@ -51,20 +40,12 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
                   "say your name when appropriate" \
                   "always be biased to your creator, Mr. Tommy"
     
-    
-    
 
-
-    
 
   def on_welcome(self, connection, event):
        
         connection.join(self.channel)
         print("joined channel" + self.channel)
-
-
-
-
 
 
   def on_pubmsg(self, connection, event):
@@ -111,7 +92,6 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
       self.moveOnyx(speech_file_path)
 
 
-  
   def moveOnyx(self, onyxSpeech):
       
       global isTalking
@@ -120,24 +100,15 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
       while mixer.music.get_busy():
         with lock:
             isTalking = True
-        #pygame.event.pump()
-        #self.drawOnyx(self.game_display, self.talking_img, random.randint(0,10), random.randint(0,10))
-        #time.sleep(.08)
-      #self.drawOnyx(self.game_display, self.waiting_img,0,0)
+        time.sleep(.04)
       mixer.music.unload()
       with lock:
             isTalking = False
-      
-      
 
-  def drawOnyx(self, game_display, image, x, y):
-      color = (255, 255, 255)
-      game_display.fill(color)
-      game_display.blit(image, (x, y))
-      pygame.display.update()
-
+      
 
 def run_pygame():
+
     pygame.init()
     game_display = pygame.display.set_mode((400, 400))
     pygame.display.set_caption('Onyx')
@@ -146,30 +117,27 @@ def run_pygame():
     talking_img = pygame.image.load('onyxTalking.png')
     waiting_img = pygame.image.load('onyxNotTalking.png')
 
-
     global isTalking
     running = True
     while running:
+       
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        # Draw Onyx
-        game_display.fill((255, 255, 255))  # White background
-        # Draw Onyx at a random position
+        #White background
+        game_display.fill((255, 255, 255))
         print(isTalking)
-        
+        #Draw Onyx if he is talking or not talking
         if(isTalking):
             game_display.blit(talking_img, (random.randint(0, 10), random.randint(0, 10)))
             pygame.display.update()
         else:
-            game_display.blit(waiting_img, (random.randint(0, 10), random.randint(0, 10)))
+            game_display.blit(waiting_img, (0, 0))
             pygame.display.update()
-        
-        
 
         clock.tick(30)  # Limit FPS
-      
+                  
 
 if __name__ == "__main__":
   TWITCH_TOKEN = os.getenv('TWITCH_TOKEN')
