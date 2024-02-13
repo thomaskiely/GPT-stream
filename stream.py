@@ -30,7 +30,7 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
 
     self.gpt_promt =  "you are an ai virtual assistant named Onyx for mrtommy's stream." \
                   "he is playing" + game +\
-                  "you are also a talking frog, remind the viewers of this occasionally." \
+                  "you are also a talking frog." \
                   "Here is a chat message and the chatter" \
                   "occasionally refer to the viewers as chat" \
                   "when a chatter types a message use their name in your response" \
@@ -43,7 +43,6 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
 
 
   def on_welcome(self, connection, event):
-       
         connection.join(self.channel)
         print("joined channel" + self.channel)
 
@@ -61,7 +60,7 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
   def callOpenAI(self, username, message):
       if(username=="mrtommy420"):
           username = "Mr.Tommy"
-      elif(username=="phonesteveyas"):
+      elif(username=="phonesteveya"):
           username = "jeff steve"
       if(len(message)<15):
           return
