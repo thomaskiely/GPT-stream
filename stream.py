@@ -127,7 +127,6 @@ def run_pygame():
 
         #White background
         game_display.fill((255, 255, 255))
-        print(isTalking)
         #Draw Onyx if he is talking or not talking
         if(isTalking):
             game_display.blit(talking_img, (random.randint(0, 10), random.randint(0, 10)))
