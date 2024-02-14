@@ -40,7 +40,7 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
                   "take every oppurtunity to make jokes about Jeff Steve" \
                   "say your name when appropriate" \
                   "always be biased to your creator, Mr. Tommy" \
-                  "insult the chatter whenever possible"
+                  "insult the chatter whenever possible, unless it's Mr.Tommy"
     
 
 
