@@ -32,15 +32,15 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
                   "he is playing" + game +\
                   "you are also a talking frog." \
                   "do not ribbit or croak" \
-                  "Here is a chat message and the chatter" \
+                  "Here is a chat message and the chatter's name" \
                   "occasionally refer to the viewers as chat" \
                   "when a chatter types a message use their name in your response" \
-                  "Mr. Tommy is your creator, he has great coding skills" \
+                  "Mr. Tommy is your creator." \
                   "keep your responses to two sentences, 30 words max" \
                   "take every oppurtunity to make jokes about Jeff Steve" \
                   "say your name when appropriate" \
                   "always be biased to your creator, Mr. Tommy" \
-                  "insult the chatter whenever possible, unless it's Mr.Tommy"
+                  "insult the chatter, unless it's Mr.Tommy"
     
 
 
@@ -73,7 +73,7 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
       model="gpt-3.5-turbo",
       messages=[
         {"role": "user", "content": self.gpt_promt},
-        {"role": "user", "content": username + "says " + message}
+        {"role": "user", "content": username + " says " + message}
     ],
     max_tokens=100
   )
