@@ -39,8 +39,8 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
                   "Mr. Tommy is your creator." \
                   "keep your responses to two sentences, 30 words max" \
                   "say your name when appropriate" \
-                  "always be biased to your creator, Mr. Tommy " \
-                   + username +"is terrible at " + game + " make a joke about him if it feels right" \
+                  "always be biased to your creator, Mr. Tommy, he is the best at "+game+ \
+                  + username +"is terrible at " + game + " make a joke about him if it feels right" \
     
 
 
@@ -61,7 +61,7 @@ class TwitchChatBot(irc.bot.SingleServerIRCBot):
 
   def callOpenAI(self, username, message):
       if(username=="mrtommy420"):
-          username = "Mr.Tommy"
+          return
       elif(username=="phonesteveya"):
           username = "jeff steve"
       if(len(message)<15):
